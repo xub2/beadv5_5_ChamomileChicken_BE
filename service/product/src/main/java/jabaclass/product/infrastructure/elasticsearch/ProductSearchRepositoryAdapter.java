@@ -63,7 +63,7 @@ public class ProductSearchRepositoryAdapter implements ProductSearchRepository {
 		// CriteriaQuery or().and() 체이닝 시 우선순위 문제로 NativeQuery bool 쿼리 사용
 		// (title OR description) AND status=ENABLE AND deleted=false
 		Query query = Query.of(q -> q
-			.bool(b -> b
+			.bool(b -> b // 두가지 이상 조건 은 bool 쿼리 써야함
 				.should(s -> s.match(m -> m.field("title").query(keyword).fuzziness("AUTO").prefixLength(1)))
 				.should(s -> s.match(m -> m.field("description").query(keyword)))
 				.minimumShouldMatch("1")
