@@ -1,6 +1,10 @@
 api:
   user-host: ${USER_SERVICE_URL}
 
+elasticsearch:
+  index:
+    recreate-on-startup: false
+
 spring:
   elasticsearch:
     uris: ${ES_URL:http://localhost:9200}

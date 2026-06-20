@@ -1,39 +1,51 @@
 package jabaclass.product.infrastructure.elasticsearch;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ElasticsearchIndexInitializer implements ApplicationRunner {
+public class ElasticsearchIndexInitializer {
 
 	private final ElasticsearchOperations elasticsearchOperations;
 
-	@Value("${spring.jpa.hibernate.ddl-auto:none}")
-	private String ddlAuto;
+	@Value("${elasticsearch.index.recreate-on-startup:false}")
+	private boolean recreateOnStartup;
 
-	@Override
-	public void run(ApplicationArguments args) {
+	@PostConstruct
+	public void init() {
 		IndexOperations indexOps = elasticsearchOperations.indexOps(ProductDocument.class);
 
-		if ("create".equals(ddlAuto) || "create-drop".equals(ddlAuto)) {
+		if (recreateOnStartup) {
 			if (indexOps.exists()) {
 				indexOps.delete();
-				log.info("products 인덱스 삭제 (DB 초기화 감지)");
+				log.info("products 인덱스 삭제 (recreate-on-startup 설정)");
 			}
 			indexOps.createWithMapping();
 			log.info("products 인덱스 재생성 완료");
-		} else if (!indexOps.exists()) {
+			return;
+		}
+
+		if (!indexOps.exists()) {
 			indexOps.createWithMapping();
 			log.info("products 인덱스 생성 완료");
+			return;
+		}
+
+		// 매핑 변경 감지
+		Map<String, Object> currentMapping = indexOps.getMapping();
+		Map<String, Object> expectedMapping = indexOps.createMapping();
+		if (!currentMapping.equals(expectedMapping)) {
+			log.warn("products 인덱스 매핑 불일치 감지. elasticsearch.index.recreate-on-startup=true 로 재생성하거나 수동으로 재색인하세요.");
 		}
 	}
 }
