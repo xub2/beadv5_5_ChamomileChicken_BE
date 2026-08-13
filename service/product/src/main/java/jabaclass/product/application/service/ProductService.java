@@ -173,8 +173,17 @@ public class ProductService implements ProductUseCase {
 		return SearchProductResponseDto.fromEs(page, content);
 	}
 
+	@Override
+	public SearchProductResponseDto searchByDb(SearchProductRequestDto requestDto) {
+		return doDbSearch(requestDto);
+	}
+
 	private SearchProductResponseDto searchAllFallback(SearchProductRequestDto requestDto, Throwable t) {
 		log.warn("ES 장애 감지 — DB fallback 실행. circuit: elasticsearchCB", t);
+		return doDbSearch(requestDto);
+	}
+
+	private SearchProductResponseDto doDbSearch(SearchProductRequestDto requestDto) {
 		Pageable pageable = PageRequest.of(requestDto.thisPage(), requestDto.pageSize());
 
 		Page<Product> page;

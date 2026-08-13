@@ -43,4 +43,7 @@ public interface ProductUseCase {
 	// PostgreSQL → ES 초기 마이그레이션
 	// 새 상품은 생성/수정 시점에 자동으로 ES에 색인되지만, ES 도입 이전에 이미 RDB에 쌓인 상품들은 ES에 없는 상태라 검색이 안 됨. 이걸 한 번에 밀어넣기 위한 엔드포인트
 	int migrateToEs();
+
+	// DB 직접 검색 (부하 테스트용 — Full Scan / GIN 인덱스 성능 측정 엔드포인트)
+	SearchProductResponseDto searchByDb(SearchProductRequestDto requestDto);
 }

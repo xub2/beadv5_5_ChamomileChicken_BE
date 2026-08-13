@@ -42,8 +42,8 @@ public class ElasticsearchIndexInitializer {
 		}
 
 		// 매핑 변경 감지
-		Map<String, Object> currentMapping = indexOps.getMapping();
-		Map<String, Object> expectedMapping = indexOps.createMapping();
+		Map<String, Object> currentMapping = indexOps.getMapping(); // 지금 ES에 실제로 저장되어 있는 매핑
+		Map<String, Object> expectedMapping = indexOps.createMapping(); // 현재 ProductDocument 기준으로 "원래 이래야 하는" 매핑
 		if (!currentMapping.equals(expectedMapping)) {
 			log.warn("products 인덱스 매핑 불일치 감지. elasticsearch.index.recreate-on-startup=true 로 재생성하거나 수동으로 재색인하세요.");
 		}
